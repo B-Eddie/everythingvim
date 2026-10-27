@@ -1,4 +1,4 @@
-// Everything Vim site: nav, reveal, step tabs, and three live demos (hints / vim buffer / vomnibar).
+// Everything Vim site: nav, step tabs, and three live demos (hints / vim buffer / vomnibar).
 (() => {
   "use strict";
 
@@ -54,52 +54,6 @@
     });
   }
 
-  /* ---------- Apple-style scroll reveals (staggered, expo easing) ---------- */
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  $$("[data-stagger]").forEach((group) => {
-    $$(".rv", group).forEach((el, i) => {
-      el.style.setProperty("--d", `${Math.min(i, 8) * 90}ms`);
-    });
-  });
-  const revealables = $$(".rv, .rv-scale");
-  if ("IntersectionObserver" in window && !reduced) {
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-in");
-            io.unobserve(entry.target);
-          }
-        }
-      },
-      { threshold: 0.1, rootMargin: "0px 0px -6% 0px" },
-    );
-    revealables.forEach((el) => io.observe(el));
-  } else {
-    revealables.forEach((el) => el.classList.add("is-in"));
-  }
-
-  /* ---------- nav depth on scroll + hero parallax (rAF, transform/opacity only) ---------- */
-  const navWrap = $(".nav-wrap");
-  const heroInner = $(".hero-inner");
-  let ticking = false;
-  function onScroll() {
-    ticking = false;
-    const y = window.scrollY || 0;
-    if (navWrap) navWrap.classList.toggle("scrolled", y > 24);
-    if (heroInner && !reduced && y < window.innerHeight * 1.2) {
-      heroInner.style.transform = `translateY(${y * 0.16}px)`;
-      heroInner.style.opacity = `${Math.max(0, 1 - y / (window.innerHeight * 0.85))}`;
-    }
-  }
-  window.addEventListener("scroll", () => {
-    if (!ticking) {
-      ticking = true;
-      requestAnimationFrame(onScroll);
-    }
-  }, { passive: true });
-  onScroll();
-
   /* ---------- step tabs (arrow-key navigable) ---------- */
   const tabs = $$('[role="tablist"] .step[data-tab]');
   const panels = {
@@ -120,6 +74,12 @@
     if (focus) tab.focus({ preventScroll: false });
   }
   tabs.forEach((tab, i) => {
+    const panel = panels[tab.dataset.tab];
+    if (panel) {
+      if (!tab.id) tab.id = `tab-${tab.dataset.tab}`;
+      tab.setAttribute("aria-controls", panel.id);
+      panel.setAttribute("aria-labelledby", tab.id);
+    }
     tab.tabIndex = tab.classList.contains("is-active") ? 0 : -1;
     tab.addEventListener("click", () => selectTab(tab, false));
     tab.addEventListener("keydown", (e) => {
@@ -143,15 +103,21 @@
   const hintMode = $("#hintMode");
   const hintStart = $("#hintStart");
   let hintsOn = false;
+  let hintsNewTab = false;
 
   function setHintMode(label, active) {
     if (!hintMode) return;
     hintMode.textContent = label;
     hintMode.classList.toggle("is-live", !!active);
   }
-  function showHints() {
+  function showHints(newTab = false) {
     if (!mockPage || hintsOn) return;
     hintsOn = true;
+    hintsNewTab = newTab;
+    if (hintStart) {
+      hintStart.setAttribute("aria-pressed", "true");
+      hintStart.textContent = "Hide hints";
+    }
     $(".mock-links", mockPage)?.classList.add("hints-on");
     mockLinks.forEach((a) => {
       if ($(".hint-badge", a)) return;
@@ -162,12 +128,19 @@
     });
     setHintMode("Hints — press a letter", true);
     if (hintStatus) {
-      hintStatus.textContent = "Hints are live. Press A, S, D, or F — or Esc to dismiss.";
+      hintStatus.textContent = newTab
+        ? "Shift+F mode: next letter opens in a new tab (demo). Press A, S, D, or F — or Esc to dismiss."
+        : "Hints are live. Press A, S, D, or F — or Esc to dismiss.";
     }
   }
   function hideHints(msg) {
     if (!hintsOn) return;
     hintsOn = false;
+    hintsNewTab = false;
+    if (hintStart) {
+      hintStart.setAttribute("aria-pressed", "false");
+      hintStart.textContent = "Show hints";
+    }
     $(".mock-links", mockPage)?.classList.remove("hints-on");
     $$(".hint-badge", mockPage).forEach((b) => b.remove());
     setHintMode("Idle", false);
@@ -193,6 +166,7 @@
     }
   }
   if (hintStart) {
+    hintStart.setAttribute("aria-pressed", "false");
     hintStart.addEventListener("click", () => {
       if (hintsOn) hideHints();
       else {
@@ -203,38 +177,27 @@
   }
   if (mockPage) {
     mockPage.addEventListener("keydown", (e) => {
-      if (e.key === "f" || e.key === "F") {
-        if (!hintsOn && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
-          e.preventDefault();
-          showHints();
-        } else if (!hintsOn && e.shiftKey) {
-          e.preventDefault();
-          showHints();
-          if (hintStatus) {
-            hintStatus.textContent = "Shift+F mode: next letter opens in a new tab (demo).";
-          }
-          mockPage.dataset.newtab = "1";
-        }
-        return;
-      }
+      if (e.isComposing || e.ctrlKey || e.metaKey || e.altKey) return;
       if (e.key === "Escape") {
         if (hintsOn) {
           e.preventDefault();
-          delete mockPage.dataset.newtab;
           hideHints();
         }
         return;
       }
-      if (hintsOn && /^[a-zA-Z]$/.test(e.key) && !e.ctrlKey && !e.metaKey) {
+      // Once hints are showing, f is a destination too, not another activation key.
+      if (hintsOn && /^[a-zA-Z]$/.test(e.key)) {
         e.preventDefault();
-        followHint(e.key, e.shiftKey || mockPage.dataset.newtab === "1");
-        delete mockPage.dataset.newtab;
+        followHint(e.key, e.shiftKey || hintsNewTab);
+      } else if (e.key === "f" || e.key === "F") {
+        e.preventDefault();
+        showHints(e.shiftKey || e.key === "F");
       }
     });
     mockLinks.forEach((a) => {
       a.addEventListener("click", (e) => {
         e.preventDefault();
-        if (hintsOn) followHint(a.dataset.hint || "", false);
+        if (hintsOn) followHint(a.dataset.hint || "", hintsNewTab || e.shiftKey);
         else toast(`Opened “${a.dataset.name}” (demo)`);
       });
     });
@@ -569,33 +532,59 @@
       !q || e.title.toLowerCase().includes(q) || e.url.toLowerCase().includes(q)
     );
     selIdx = Math.min(selIdx, Math.max(0, rows.length - 1));
+    vomList.replaceChildren();
     if (!rows.length) {
-      vomList.innerHTML =
-        `<li class="vom-empty">No match — press Enter to open “${filter}” as a URL (demo).</li>`;
+      const empty = document.createElement("li");
+      empty.className = "vom-empty";
+      empty.setAttribute("role", "option");
+      empty.setAttribute("aria-disabled", "true");
+      empty.textContent = `No match — press Enter to open “${filter}” as a URL (demo).`;
+      vomList.append(empty);
+      vomInput?.removeAttribute("aria-activedescendant");
       return rows;
     }
-    vomList.innerHTML = rows
-      .map((e, i) =>
-        `<li class="${
-          i === selIdx ? "is-sel" : ""
-        }" data-i="${i}"><span class="vom-kind ${e.kind}">${e.kind}</span><span class="vom-title">${e.title}</span><span class="vom-url">${e.url}</span></li>`
-      )
-      .join("");
-    $$("li", vomList).forEach((li) => {
+    rows.forEach((entry, i) => {
+      const li = document.createElement("li");
+      li.id = `vom-option-${i}`;
+      li.classList.toggle("is-sel", i === selIdx);
+      li.setAttribute("role", "option");
+      li.setAttribute("aria-selected", i === selIdx ? "true" : "false");
+      li.dataset.i = `${i}`;
+      for (const [className, value] of [
+        [`vom-kind ${entry.kind}`, entry.kind],
+        ["vom-title", entry.title],
+        ["vom-url", entry.url],
+      ]) {
+        const span = document.createElement("span");
+        span.className = className;
+        span.textContent = value;
+        li.append(span);
+      }
       li.addEventListener("click", () => {
-        const e = rows[+li.dataset.i];
-        toast(`Opened “${e.title}” (demo)`);
+        selIdx = i;
+        renderVom(filter);
+        toast(`Opened “${entry.title}” (demo)`);
       });
+      vomList.append(li);
     });
+    vomInput?.setAttribute("aria-activedescendant", `vom-option-${selIdx}`);
     return rows;
   }
   if (vomInput && vomList) {
+    vomInput.setAttribute("role", "combobox");
+    vomInput.setAttribute("aria-autocomplete", "list");
+    vomInput.setAttribute("aria-controls", vomList.id);
+    vomInput.setAttribute("aria-expanded", "true");
+    vomList.setAttribute("role", "listbox");
+    vomList.setAttribute("aria-label", "Matching tabs, bookmarks, and history");
+    vomList.setAttribute("aria-live", "polite");
     let rows = renderVom("");
     vomInput.addEventListener("input", () => {
       selIdx = 0;
       rows = renderVom(vomInput.value);
     });
     vomInput.addEventListener("keydown", (e) => {
+      if (e.isComposing) return;
       if (e.key === "ArrowDown") {
         e.preventDefault();
         selIdx = Math.min((rows?.length || 1) - 1, selIdx + 1);
@@ -617,17 +606,19 @@
   const helpOpen = $("#helpOpen");
   const helpClose = $("#helpClose");
   let helpReturnFocus = null;
+  let previousBodyOverflow = "";
   function openHelp() {
     if (!backdrop || !backdrop.hidden) return;
     helpReturnFocus = document.activeElement;
     backdrop.hidden = false;
+    previousBodyOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     if (helpClose) helpClose.focus({ preventScroll: true });
   }
   function closeHelp() {
     if (!backdrop || backdrop.hidden) return;
     backdrop.hidden = true;
-    document.body.style.overflow = "";
+    document.body.style.overflow = previousBodyOverflow;
     if (helpReturnFocus && document.contains(helpReturnFocus)) {
       helpReturnFocus.focus({ preventScroll: true });
     }
@@ -640,6 +631,28 @@
     });
   }
   document.addEventListener("keydown", (e) => {
+    if (backdrop && !backdrop.hidden) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeHelp();
+        return;
+      }
+      if (e.key === "Tab") {
+        const focusable = $$(
+          'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]',
+          backdrop,
+        ).filter((el) => el.tabIndex >= 0 && !el.closest("[hidden]"));
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (first && (e.shiftKey
+          ? document.activeElement === first || !backdrop.contains(document.activeElement)
+          : document.activeElement === last || !backdrop.contains(document.activeElement))) {
+          e.preventDefault();
+          (e.shiftKey ? last : first).focus();
+        }
+      }
+      return;
+    }
     const tag = (document.activeElement && document.activeElement.tagName) || "";
     const typing = tag === "INPUT" || tag === "TEXTAREA" ||
       (document.activeElement && document.activeElement.isContentEditable);
@@ -649,8 +662,6 @@
       if (typing) return;
       e.preventDefault();
       openHelp();
-    } else if (e.key === "Escape" && backdrop && !backdrop.hidden) {
-      closeHelp();
     }
   });
 })();

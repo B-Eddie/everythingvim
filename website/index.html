@@ -4,12 +4,13 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Everything Vim — Vim everywhere, on every site</title>
-<meta name="description" content="Everything Vim is a free Chrome extension that navigates any page like Vim and edits every text surface like Vim — text fields, Google Docs, and code editors." />
-<meta name="color-scheme" content="light dark" />
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23020204'/%3E%3Cpath d='M10 9l6 14 6-14h-3.6L16 14.4 13.6 9z' fill='white'/%3E%3C/svg%3E" />
+<meta name="description" content="Everything Vim is a free, open-source Chrome and Firefox extension for Vim page navigation and editing in text fields, Google Docs, and code editors." />
+<meta name="color-scheme" content="dark" />
+<meta name="theme-color" content="#000000" />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='2' fill='%23111111'/%3E%3Cpath d='M10 9l6 14 6-14h-3.6L16 14.4 13.6 9z' fill='%23eeeeee'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter+Tight:wght@600;700&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -25,6 +26,7 @@
       <a href="#try">Try it</a>
       <a href="#how">How it works</a>
       <a href="#bindings">Bindings</a>
+      <a href="#firefox">Firefox</a>
       <a href="#faq">FAQ</a>
     </nav>
     <div class="nav-actions">
@@ -37,24 +39,41 @@
     <a href="#try">Try it</a>
     <a href="#how">How it works</a>
     <a href="#bindings">Bindings</a>
+    <a href="#firefox">Firefox preview</a>
     <a href="#faq">FAQ</a>
     <a class="mobile-cta" href="https://chromewebstore.google.com/detail/general-vim/mglliapjiolajkmcfaombcifockgaekc?authuser=0&hl=en" target="_blank" rel="noopener">Add to Chrome — it's free</a>
   </div>
 </header>
 
-<!-- DARK THEATER -->
+<!-- SESSION / INTRO -->
 <section class="hero" id="top">
+  <div class="hero-status"><span>everything-vim / browser extension</span><span>Chrome · Firefox preview</span></div>
+  <div class="hero-grid">
   <div class="hero-inner">
-    <p class="eyebrow eyebrow-light hero-fade" style="--hd:0ms">Everything Vim — Chrome extension · Free · Open source</p>
-    <h1 class="display" aria-label="Stop reaching for the mouse."><span class="line" aria-hidden="true"><span style="--hd:80ms">Stop reaching</span></span><span class="line" aria-hidden="true"><span style="--hd:200ms">for the <em>mouse.</em></span></span></h1>
-    <p class="hero-sub hero-fade" style="--hd:340ms">Navigate any page like Vim. Edit every text surface like Vim — text fields, Google Docs, and code editors — with a handoff you never feel.</p>
-    <div class="hero-actions hero-fade" style="--hd:460ms">
-      <a class="btn-hero" href="https://chromewebstore.google.com/detail/general-vim/mglliapjiolajkmcfaombcifockgaekc?authuser=0&hl=en" target="_blank" rel="noopener">Add to Chrome — it's free</a>
-      <a class="btn-watch" href="#try"><span class="play" aria-hidden="true">▶</span>Try it live</a>
+    <p class="eyebrow eyebrow-light">Everything Vim · Free · Open source</p>
+    <h1 class="display">Stop reaching<br />for the mouse<span class="cursor">.</span></h1>
+    <p class="hero-sub">Navigate any page like Vim. Edit every text surface like Vim — text fields, Google Docs, and code editors — with a handoff you never feel.</p>
+    <div class="hero-actions">
+      <a class="btn-hero" href="https://chromewebstore.google.com/detail/general-vim/mglliapjiolajkmcfaombcifockgaekc?authuser=0&hl=en" target="_blank" rel="noopener">Add to Chrome — it's free <span aria-hidden="true">→</span></a>
+      <a class="btn-watch" href="#try">Try it live <span aria-hidden="true">↗</span></a>
     </div>
-    <p class="hero-micro hero-fade" style="--hd:560ms">Free · No signup · Press <kbd class="kbd-dark">?</kbd> on any page for help</p>
+    <p class="hero-micro">Free · No signup · Press <kbd>?</kbd> on any page for help</p>
+    <a class="hero-firefox" href="#firefox">On Firefox? Load the desktop preview →</a>
   </div>
-  <div class="spectrum" aria-hidden="true"></div>
+  <div class="window session-window" aria-label="Example keyboard session">
+    <div class="window-bar"><span class="terminal-icon" aria-hidden="true">&gt;_</span><span class="window-tab">session / everything-vim</span><span class="pill pill-sm">NORMAL</span></div>
+    <div class="session-body">
+      <p class="terminal-comment"># Your browser. Your home row.</p>
+      <div class="session-line"><span class="line-number">01</span><kbd>j j k</kbd><span>scroll the page</span></div>
+      <div class="session-line"><span class="line-number">02</span><kbd>f</kbd><span>find your next link</span></div>
+      <div class="session-line"><span class="line-number">03</span><kbd>o</kbd><span>open the Vomnibar</span></div>
+      <div class="session-line"><span class="line-number">04</span><kbd>Esc dw</kbd><span>edit without the mouse</span></div>
+      <div class="session-output"><span class="terminal-prompt" aria-hidden="true">&gt;</span><span>One keyboard. Every surface.</span></div>
+      <div class="session-log" aria-hidden="true"><span>keys / captured</span><div class="log-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span>mouse / idle</span></div>
+    </div>
+  </div>
+  </div>
+  <div class="hero-footer"><span>hjkl / navigate</span><span>f / follow links</span><span>o / command</span><span>Esc / take control</span></div>
 </section>
 
 <main id="main">
@@ -237,8 +256,28 @@ Press i to type again.</textarea>
     </div>
   </section>
 
+  <!-- FIREFOX PREVIEW -->
+  <section id="firefox" class="section firefox-section" aria-labelledby="firefox-title">
+    <p class="eyebrow">06 — Firefox</p>
+    <h2 class="section-title" id="firefox-title">Your Vim keys. In Firefox</h2>
+    <p class="lede">Page navigation, text editing, rich-text overlays and Notion fixes. Version 1.0.5 also fixes Escape and Vim editing in Google Docs.</p>
+    <div class="window window-wide firefox-terminal">
+      <div class="window-bar"><span class="terminal-icon" aria-hidden="true">&gt;_</span><span class="window-tab">install / firefox</span><span class="pill pill-sm">v1.0.5</span></div>
+      <div class="window-body">
+        <p class="terminal-label">Firefox · Version 1.0.5</p>
+        <p class="terminal-comment"># Live on Mozilla Add-ons.</p>
+        <dl class="terminal-transcript">
+          <div><dt><span class="terminal-prompt" aria-hidden="true">$</span> install --firefox</dt><dd><a class="btn-dark" href="https://addons.mozilla.org/en-US/firefox/addon/everything-vim/">Get it on Firefox Add-ons →</a><p>Signed release · Version 1.0.5 · Firefox 128 or newer</p></dd></div>
+          <div><dt><span class="terminal-prompt" aria-hidden="true">$</span> refresh --tabs</dt><dd><p>Refresh your tabs. Your Vim keys are ready.</p></dd></div>
+        </dl>
+        <p class="terminal-footnote"># Firefox 128 or newer<br /># Signed release · Listed on Mozilla Add-ons.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- QUOTE -->
   <section class="section section-narrow">
+    <p class="eyebrow quote-label">feedback / from the home row</p>
     <figure class="pullquote rv">
       <blockquote>“Hints for links, real motions in every input, and Docs finally behaves. I uninstalled three extensions.”</blockquote>
       <figcaption>Staff Engineer</figcaption>
@@ -247,7 +286,7 @@ Press i to type again.</textarea>
 
   <!-- FAQ -->
   <section id="faq" class="section section-narrow">
-    <p class="eyebrow rv">06 — Questions</p>
+    <p class="eyebrow rv">07 — Questions</p>
     <h2 class="section-title rv">FAQ.</h2>
     <div class="faq rv">
       <details open>
@@ -277,8 +316,9 @@ Press i to type again.</textarea>
     <div class="foot-links">
       <a href="https://github.com/B-Eddie/allinvim" target="_blank" rel="noopener">GitHub</a>
       <a href="#bindings">Bindings</a>
+      <a href="#firefox">Firefox preview</a>
       <a href="#faq">FAQ</a>
-      <a href="/privacy">Privacy</a>
+      <a href="privacy.html">Privacy</a>
     </div>
     <p class="foot-note">Everything Vim — navigation by Vim, editing everywhere.</p>
   </div>
